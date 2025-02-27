@@ -8,7 +8,7 @@ KEY_UNIT = 19.05; // Square that makes up the entire space of a key
 
 // Draws the keycap without legends (because we need to do an intersection() of the keycap+legends to make sure legends conform to the correct shape)
 module _poly_keycap(height=9.0, length=18, width=18,
-  wall_thickness=1.25, top_difference=6, top_x=0, top_y=0, dish_type="cylinder", 
+  wall_thickness=0.25, top_difference=6, top_x=0, top_y=0, dish_type="cylinder", 
   dish_tilt=-4, dish_depth=1, dish_x=0, dish_y=0, dish_z=-0.75, dish_thickness=2,
   dish_fn=32, dish_corner_fn=64, dish_tilt_curve=false, stem_clips=false,
   stem_walls_inset=0, stem_walls_tolerance=0.25,
@@ -42,7 +42,10 @@ module _poly_keycap(height=9.0, length=18, width=18,
             reduction_factor_above = polygon_slice(l+1, polygon_curve, total_steps=polygon_layers);
             curve_val_below = (top_difference - reduction_factor_below) * (l/polygon_layers);
             curve_val_above = (top_difference - reduction_factor_above) * ((l+1)/polygon_layers);
-            if (polygon_rotation) {
+            if (polygon_rotation) {		
+	//scale([1.1, 1.1, 1])
+			//minkowski() { // TW
+				sphere(r=1, $fn=50); // Smoothing circle
                 hull() {
                     rotate([tilt_below_curved,0,polygon_layer_rotation*l]) {
                         translate([
@@ -83,6 +86,7 @@ module _poly_keycap(height=9.0, length=18, width=18,
                             }
                     }
                 }
+				//}
             } else {
                 if (is_odd(l)) {
                     hull() {
@@ -394,22 +398,24 @@ module poly_keycap(height=9.0, length=18, width=18,
         echo(stem_clips=stem_clips, stem_walls_inset=stem_walls_inset);
     }
     rotate(key_rotation) {
+	// TW
+	scale([1.14, 0.97, 1.0])
         difference() {
-            _poly_keycap(
-                height=height, length=length, width=width, wall_thickness=wall_thickness,
-                top_difference=top_difference, dish_tilt=dish_tilt,
-                dish_tilt_curve=dish_tilt_curve, stem_clips=stem_clips,
-                stem_walls_inset=stem_walls_inset,
-                top_x=top_x, top_y=top_y, dish_depth=dish_depth,
-                dish_x=dish_x, dish_y=dish_y, dish_z=dish_z,
-                dish_thickness=dish_thickness, dish_fn=dish_fn,
-                dish_corner_fn=dish_corner_fn,
-                polygon_layers=polygon_layers, polygon_layer_rotation=polygon_layer_rotation,
-                polygon_edges=polygon_edges, polygon_curve=polygon_curve,
-                dish_type=dish_type, corner_radius=corner_radius,
-                dish_division_x=dish_division_x, dish_division_y=dish_division_y,
-                corner_radius_curve=corner_radius_curve, polygon_rotation=polygon_rotation,
-                dish_invert=dish_invert);
+           // _poly_keycap(
+            //    height=height, length=length, width=width, wall_thickness=wall_thickness,
+            //    top_difference=top_difference, dish_tilt=dish_tilt,
+            //    dish_tilt_curve=dish_tilt_curve, stem_clips=stem_clips,
+            //    stem_walls_inset=stem_walls_inset,
+            //    top_x=top_x, top_y=top_y, dish_depth=dish_depth,
+           //     dish_x=dish_x, dish_y=dish_y, dish_z=dish_z,
+           //     dish_thickness=dish_thickness, dish_fn=dish_fn,
+           //     dish_corner_fn=dish_corner_fn,
+           //     polygon_layers=polygon_layers, polygon_layer_rotation=polygon_layer_rotation,
+            //    polygon_edges=polygon_edges, polygon_curve=polygon_curve,
+            //    dish_type=dish_type, corner_radius=corner_radius,
+            //    dish_division_x=dish_division_x, dish_division_y=dish_division_y,
+            //    corner_radius_curve=corner_radius_curve, polygon_rotation=polygon_rotation,
+            //    dish_invert=dish_invert);
             tilt_above_curved = dish_tilt_curve ? layer_tilt_adjust * polygon_layers : 0;
             // Take care of the legends
             for (i=[0:1:len(legends)-1]) {

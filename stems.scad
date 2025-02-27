@@ -18,9 +18,9 @@ CHERRY_SWITCH_LENGTH = 15.6;
 CHERRY_SWITCH_WIDTH = 15.6;
 CHERRY_CYLINDER_DIAMETER = 5.47;
 CHERRY_STEM_HEIGHT = 4.5; // How far the underside of the keycap extends into the stem()
-CHERRY_CROSS_X_THICKNESS = 1.3; // Width of the - in the +
-CHERRY_CROSS_Y_THICKNESS = 1.1; // Width of the - in the |
-CHERRY_CROSS_LENGTH = 4; // Length of the - and the | in the +
+CHERRY_CROSS_X_THICKNESS = 1.27; // Width of the - in the +
+CHERRY_CROSS_Y_THICKNESS = 0.90; // Width of the - in the |
+CHERRY_CROSS_LENGTH = 4.4; // Length of the - and the | in the +
 CHERRY_BOX_STEM_WIDTH = 6.5; // Outside dimensions of a box-style stem
 CHERRY_BOX_STEM_LENGTH = 6.5;
 // Alps constants
@@ -186,9 +186,11 @@ module stem_box_cherry(key_height, key_length, key_width, dish_depth, dish_thick
     // NOTE: We generate it similarly to poly_keycap()'s trapezoidal interior cutout so we have a precise fit
     // Give the "undershelf" a distinct color so you know it's there and not the same as the keycap:
 //    color("#620093") // Purple
-    rotate(key_rotation)
+ 
+    rotate(key_rotation) scale([1.3,1.1,1])
         if (uniform_wall_thickness) {
             difference() {
+				scale([0.9,0.9,1])
                 _poly_keycap(
                 // Since this is an interior cutout sort of thing we need to cut the height down slightly so there's some overlap
                     height=key_height-wall_thickness,
@@ -368,60 +370,24 @@ module _stem_box_cherry(key_height, key_length, key_width, dish_depth, dish_thic
     front_support = side_supports[2];
     back_support = side_supports[3];
     stem_rotation = (polygon_layer_rotation*polygon_layers)/1.25;
+	
+	
     rotate(key_rotation) {
         // Generate the top part of the stem that connects to the underside of the keycap
         if (uniform_wall_thickness) {
-            translate(location) difference() {
+		    //TW
+			rotate([0,0,-12])
+            translate(location) 
+			 difference() {			
                 translate([0,0,depth/2+inset])
                     squarish_rpoly(xy=[length,width], h=depth, r=corner_radius, center=true);
-                translate([0,0,inset])
-                    cherry_cross(tolerance=inside_tolerance, flare_base=true);
+				
+				rotate([0,0,-45])
+					translate([0,0,inset])
+						cherry_cross(tolerance=inside_tolerance, flare_base=true);
             }
             stem_topper_height = key_height-depth-inset;
-            intersection() {
-                translate(location) translate([
-                  0,
-                  0,
-                  stem_topper_height/2+inset+depth])
-                    union() {
-                        squarish_rpoly(
-                            xy1=[length,width],
-                            xy2=[key_length/1.5,key_width/1.5],
-                            h=stem_topper_height,
-                            r=corner_radius, center=true);
-            // This part gives legends something to rest on so there's no holes:
-                        if (legend_backing) {
-                            translate([0,0,-stem_topper_height/2-inset-depth+key_height-dish_depth-wall_thickness/2])
-                                rotate([dish_tilt,0,0]) squarish_rpoly(
-                                    xy1=[key_length,key_width],
-                                    xy2=[key_length,key_width],
-                                    h=wall_thickness,
-                                    r=corner_radius, center=true);
-                        }
-                    }
-                // Carve out the top of the little stem topper bit so that it matches the keycap more precisely:
-                _poly_keycap(
-                // wall_thickness gets reduced a smidge to ensure there's *some* overlap
-                    height=key_height-wall_thickness/2,
-                    length=key_length-wall_thickness*1.5,
-                    width=key_width-wall_thickness*1.5,
-                    wall_thickness=wall_thickness,
-                    top_difference=top_difference, dish_tilt=dish_tilt,
-                    dish_tilt_curve=dish_tilt_curve,
-                    top_x=top_x, top_y=top_y, dish_depth=dish_depth,
-                    dish_x=dish_x, dish_y=dish_y, dish_z=dish_z,
-                    dish_thickness=dish_thickness, dish_fn=dish_fn,
-                    dish_corner_fn=dish_corner_fn,
-                    polygon_layers=polygon_layers,
-                    polygon_layer_rotation=polygon_layer_rotation,
-                    polygon_edges=polygon_edges, polygon_curve=polygon_curve,
-                    dish_type=dish_type,
-                    dish_division_x=dish_division_x, dish_division_y=dish_division_y,
-                    corner_radius=key_corner_radius/2,
-                    corner_radius_curve=corner_radius_curve,
-                    polygon_rotation=polygon_rotation,
-                    dish_invert=dish_invert);
-            }
+			
         } else { // Non-uniform wall thickness
             translate(location) difference() {
                 translate([0,0,depth/2+inset])
@@ -1109,6 +1075,9 @@ module stem_support(key_height, key_length, key_width, dish_depth, dish_thicknes
     inverted_dish_adjustment = dish_invert ? wall_thickness : 0;
     // When not using uniform_wall_thickness, this is used to figure out how much extra space the corner radius takes up at the top of the keycap so the stem doesn't stick out the sides:
     corner_radius_factor = ((corner_radius*corner_radius_curve/polygon_layers)*polygon_layers)/1.5;
+	
+	// TW
+	//scale([1.14,1,1])
     difference() {
         // NOTE: The side supports are actually attached to the sides so they stay firm while printing... They're easy enough to cut off afterwards with flush cutters.
         translate([0,0,-0.001])
